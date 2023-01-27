@@ -1,0 +1,66 @@
+# 1 SELECT * FROM weather where date_weather BETWEEN '2000-12-01' AND '2000-12-15’;
+
+# 2 SELECT EXTRACT('year' FROM date_weather) AS year, AVG(temp_max) 
+FROM weather 
+WHERE EXTRACT('year' FROM date_weather) > 1999
+GROUP BY year
+ORDER BY year;
+
+# 3 SELECT EXTRACT('year' FROM date_weather) AS year, STDDEV(temp_max) 
+FROM weather 
+WHERE EXTRACT('year' FROM date_weather) > 1999
+GROUP BY year
+ORDER BY year;
+
+# 4 SELECT * 
+FROM weather
+ORDER BY temp_max
+LIMIT 10;
+
+# 5 SELECT AVG(CASE WHEN did_rain='t' then 1 ELSE 0 END)
+FROM weather 
+where EXTRACT('year' FROM date_weather) = 2016; 
+
+#6 SELECT 
+ PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY inches_rain) 
+FROM weather
+WHERE did_rain = 't'
+AND EXTRACT('year' FROM date_weather) =2016;
+
+#7 SELECT 
+ PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY inches_rain) 
+FROM weather
+WHERE EXTRACT('year' FROM date_weather) =2016;
+
+#8 SELECT EXTRACT('year' FROM date_weather) as year,
+AVG(temp_max) as avg_july_high_temp
+FROM weather
+WHERE EXTRACT('month' FROM date_weather) = 07
+GROUP BY year
+ORDER BY avg_july_high_temp DESC
+LIMIT 10;
+
+#9 SELECT EXTRACT('year' FROM date_weather) as year,
+AVG(temp_min) as avg_min_dec_temp 
+FROM weather
+WHERE EXTRACT('month' FROM date_weather) = 12
+GROUP BY year
+ORDER BY avg_min_dec_temp
+LIMIT 10;
+
+#10 SELECT EXTRACT('year' FROM date_weather) as year,
+ROUND(AVG(temp_min::numeric), 3) as avg_min_dec_temp 
+FROM weather
+WHERE EXTRACT('month' FROM date_weather) = 12
+GROUP BY year
+ORDER BY avg_min_dec_temp
+LIMIT 10;
+
+#11 the results from question 8 showed that 2015 had the highest average monthly temperature for July - if we are looking at the monthly level then, yes, this is the hottest, but we could also define “the hottest” in different days - peak temperature - median instead of mean - number of days in a row with high temps etc 
+
+#12
+SELECT EXTRACT('month' FROM date_weather) as month,
+AVG(inches_rain) as avg_daily_rain
+FROM weather
+WHERE EXTRACT('year' FROM date_weather) between 2000 and 2010
+GROUP BY month;
