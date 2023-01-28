@@ -1,0 +1,34 @@
+#1 SELECT * from employee order by salary DESC;
+
+#2 SELECT d.deptname, count(e.empid) as num_emp
+FROM employee as e
+FULL OUTER JOIN department as d on e.deptid = d.deptid
+GROUP BY d.deptname 
+ORDER BY num_emp desc;
+
+#3 SELECT * 
+FROM employee
+WHERE managerid is null;
+
+#4 SELECT e.name as employee, m.name as manager
+FROM employee as e
+LEFT JOIN employee as m
+on e.managerid = m.empid ;
+
+#5 SELECT COUNT(e.name) AS num_reports, m.name as manager
+FROM employee as e
+RIGHT JOIN employee as m
+on e.managerid = m.empid
+WHERE (CASE 
+	WHEN m.managerid is null
+	THEN True
+	ELSE False
+	END) = True
+GROUP BY manager;
+
+#6 SELECT * FROM (SELECT name, deptid, salary, rank() over (partition by deptid order by salary desc) as rank
+FROM employee) ranks
+where rank <= 2; 
+
+
+
