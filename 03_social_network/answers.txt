@@ -1,0 +1,59 @@
+#1 SELECT COUNT(user_id), house
+FROM users
+GROUP BY house;
+
+#2 
+SELECT *
+FROM follows 
+WHERE date_created < '1993-09-01';
+
+# 3 
+SELECT date_created, u.first_name as user_first, u2.first_name as follow_first
+FROM follows as f 
+LEFT JOIN users as u on f.user_id = u.user_id
+LEFT JOIN users as u2 on u2.user_id = f.follows
+;
+
+#4
+SELECT date_created, u.first_name as user_first, u2.first_name as follow_first
+FROM follows as f 
+LEFT JOIN users as u on f.user_id = u.user_id
+LEFT JOIN users as u2 on u2.user_id = f.follows
+WHERE f.date_created < '1993-09-01'
+;
+
+
+#5
+SELECT COUNT(f.user_id) as num_followers, CONCAT(u.first_name, ' ' ,u.last_name) as fullname
+FROM follows as f 
+JOIN users as u on f.follows = u.user_id
+WHERE f.date_created < '1999-12-31'
+GROUP BY follows, fullname
+;
+
+#6
+SELECT COUNT(follows) as num_followers, CONCAT(u.first_name, ' ' ,u.last_name) as fullname
+FROM follows as f 
+RIGHT JOIN users as u on f.user_id = u.user_id
+GROUP BY fullname
+;
+
+#7
+SELECT u1.first_name as username, u1.house as u_house, u2.first_name as followname, u2.house as f_house
+FROM users as u1
+LEFT JOIN follows as f
+on f.user_id = u1.user_id
+LEFT JOIN users as u2 
+on f.follows = u2.user_id
+where u1.house <> u2.house;
+
+#8
+SELECT DISTINCT f1.user_id, f2.user_id, greatest(f1.date_created, f2.date_created)
+FROM follows as f1
+INNER JOIN follows as f2
+on f1.follows = f2.user_id
+WHERE f1.follows = f2.user_id
+and f2.follows = f1.user_id;
+
+
+#9
