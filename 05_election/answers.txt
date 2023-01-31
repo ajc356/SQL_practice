@@ -1,0 +1,102 @@
+#1
+SELECT COUNT(DISTINCT candidate)
+FROM candidate 
+WHERE year = 2000;
+
+#2
+SELECT COUNT(DISTINCT candidate), year 
+FROM candidate 
+WHERE year BETWEEN 1984 AND 2016
+GROUP BY YEAR;
+
+
+#3
+select SUM(democrat_votes) as total_dem,
+		SUM(republican_votes) as total_rep,
+		CASE WHEN SUM(democrat_votes) > SUM(republican_votes) THEN 'dem'
+		ELSE 'rep'
+		END AS winner,
+		year
+from election 
+WHERE year between 1984 and 2016
+GROUP BY year
+ORDER BY YEAR DESC
+;
+
+
+#4 
+select SUM(democrat_votes) as total_dem,
+		SUM(republican_votes) as total_rep,
+		CASE WHEN SUM(democrat_votes) > SUM(republican_votes) THEN 'dem'
+		ELSE 'rep'
+		END AS winner,
+		SUM(democrat_votes) - SUM(republican_votes) as margin,
+		year
+from election 
+WHERE year between 1984 and 2016
+GROUP BY year
+ORDER BY YEAR DESC
+;
+
+#5
+WITH CTE as (select SUM(democrat_votes) as total_dem,
+		SUM(republican_votes) as total_rep,
+		CASE WHEN SUM(democrat_votes) > SUM(republican_votes) THEN 1
+		ELSE 0
+		END AS dem_winner,
+		state,
+		year
+from election 
+WHERE year > 1952
+GROUP BY state, year
+ORDER BY state)
+
+SELECT state, SUM(dem_winner) as total_dem_wins
+from CTE 
+GROUP BY state
+HAVING SUM(dem_winner) < 3
+;
+
+
+#6 
+WITH CTE as (select SUM(democrat_votes) as total_dem,
+		SUM(republican_votes) as total_rep,
+		CASE WHEN SUM(democrat_votes) > SUM(republican_votes) THEN 0
+		ELSE 1
+		END AS rep_winner,
+		state,
+		year
+from election 
+WHERE year > 1952
+GROUP BY state, year
+ORDER BY state)
+
+SELECT state, SUM(rep_winner) as total_rep_wins
+from CTE 
+GROUP BY state
+HAVING SUM(rep_winner) < 3
+;
+
+#7 
+WITH cte as (SELECT SUM(democrat_votes) as total_dem,
+		SUM(republican_votes) as total_rep,
+		CASE WHEN SUM(democrat_votes) > SUM(republican_votes) THEN 1
+		ELSE 0
+		END AS dem_winner,
+		state,
+		year
+from election 
+WHERE year > 1987
+GROUP BY state, year
+ORDER BY state)
+
+SELECT state, 
+		CASE WHEN SUM(dem_winner) = 8 then 'dem'
+		WHEN SUM(dem_winner) = 0 then 'rep'
+		ELSE null 
+		END as partisan,
+		SUM(dem_winner)
+FROM cte 
+GROUP BY state 
+HAVING SUM(dem_winner) in (0, 8)
+;
