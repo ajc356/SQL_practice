@@ -1,0 +1,111 @@
+#1 
+SELECT *
+FROM product
+ORDER BY price DESC
+LIMIT 10;
+
+
+#2 
+SELECT state, count(customer_id) as num_customers
+FROM customer 
+GROUP BY state
+HAVING count(customer_id) > 5
+ORDER BY num_customers DESC; 
+
+#3 
+SELECT COUNT(o.order_id) as num_orders, c.name, c.address, c.state 
+FROM customer_order as o
+LEFT JOIN customer as c
+on o.customer_id = c.customer_id
+GROUP BY c.name, c.address, c.state
+ORDER BY num_orders DESC
+LIMIT 17;
+
+
+#4 
+WITH cte as (SELECT op.order_id,  op.product_id, op.qty, p.price, (op.qty * p.price) as total 
+FROM order_product AS op
+LEFT JOIN product as p 
+	ON p.product_id = op.product_id
+LEFT JOIN customer_order AS co
+	ON op.order_id = co.order_id
+WHERE co.customer_id = 1026
+GROUP BY op.order_id, op.product_id, op.qty, p.price)
+
+SELECT cte.order_id, COUNT(DISTINCT cte.product_id), sum(total)
+FROM cte
+GROUP BY cte.order_id; 
+
+
+#5 
+WITH cte as (SELECT co.customer_id, op.order_id,  op.product_id, op.qty, p.price, (op.qty * p.price) as total 
+FROM order_product AS op
+LEFT JOIN product as p 
+	ON p.product_id = op.product_id
+LEFT JOIN customer_order AS co
+	ON op.order_id = co.order_id
+GROUP BY co.customer_id, op.order_id, op.product_id, op.qty, p.price)
+
+SELECT cte.customer_id, sum(total) as lifetime
+FROM cte
+GROUP BY cte.customer_id
+ORDER BY lifetime DESC
+LIMIT 10; 
+
+#6 
+WITH cte as (SELECT co.customer_id, c.name, c.address, c.state, op.order_id,  op.product_id, op.qty, p.price, (op.qty * p.price) as total 
+FROM order_product AS op
+LEFT JOIN product as p 
+	ON p.product_id = op.product_id
+LEFT JOIN customer_order AS co
+	ON op.order_id = co.order_id
+LEFT JOIN customer as c 
+	ON co.customer_id = c.customer_id
+GROUP BY co.customer_id, c.name, c.address, c.state, op.order_id, op.product_id, op.qty, p.price)
+
+SELECT cte.customer_id, cte.name, cte.address, sum(total) as lifetime
+FROM cte
+GROUP BY cte.customer_id, cte.name, cte.address
+ORDER BY lifetime DESC
+LIMIT 10; 
+
+#7 
+WITH cte as (SELECT co.customer_id, c.name, c.address, c.state, op.order_id,  extract(year from date_ordered) as year,
+	op.product_id, op.qty, p.price, (op.qty * p.price) as total 
+FROM order_product AS op
+LEFT JOIN product as p 
+	ON p.product_id = op.product_id
+LEFT JOIN customer_order AS co
+	ON op.order_id = co.order_id
+LEFT JOIN customer as c 
+	ON co.customer_id = c.customer_id
+GROUP BY co.customer_id, c.name, c.address, c.state, op.order_id, year, op.product_id, op.qty, p.price
+HAVING extract(year from date_ordered) =2017)
+
+SELECT cte.customer_id, cte.name,  sum(total) as lifetime
+FROM cte
+GROUP BY cte.customer_id, cte.name 
+ORDER BY lifetime DESC
+LIMIT 10; 
+
+
+# 8 
+SELECT product_id, sum(qty) as total
+FROM order_product
+GROUP BY product_id
+ORDER BY total DESC
+LIMIT 3;
+
+#9
+SELECT AVG(date_diff)
+FROM (SELECT EXTRACT(day from date_delivered - date_ordered ) as date_diff
+FROM customer_order) as aa
+;
+
+
+#10
+SELECT AVG(date_diff), year
+FROM (SELECT EXTRACT(year from date_ordered) as year, EXTRACT(day from date_delivered - date_ordered ) as date_diff
+FROM customer_order) as aa
+GROUP BY year 
+;
